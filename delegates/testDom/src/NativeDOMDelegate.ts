@@ -535,6 +535,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     disconnectOverlayHtml.id = "disconnectOverlay";
     disconnectOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    disconnectOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    disconnectOverlayHtml.style.backgroundRepeat = "no-repeat";
+    disconnectOverlayHtml.style.backgroundPosition = "center";
     disconnectOverlayHtml.className = "clickableState";
 
     // set the event Listener
@@ -616,6 +619,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     connectOverlayHtml.id = "connectOverlay";
     connectOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    connectOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    connectOverlayHtml.style.backgroundRepeat = "no-repeat";
+    connectOverlayHtml.style.backgroundPosition = "center";
     connectOverlayHtml.className = "clickableState";
 
     // set the event Listener
@@ -634,6 +640,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     connectOverlayHtmlInner.id = "connectButton";
     connectOverlayHtmlInner.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    connectOverlayHtmlInner.style.backgroundColor = "rgba(0,0,0,0.88)";
+    connectOverlayHtmlInner.style.backgroundRepeat = "no-repeat";
+    connectOverlayHtmlInner.style.backgroundPosition = "center";
     connectOverlayHtmlInner.innerHTML = "Click to start";
 
     // instantiate the overlay
@@ -653,6 +662,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     playOverlayHtml.id = "playOverlay";
     playOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    playOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    playOverlayHtml.style.backgroundRepeat = "no-repeat";
+    playOverlayHtml.style.backgroundPosition = "center";
     playOverlayHtml.className = "clickableState";
 
     // set the event Listener
@@ -689,6 +701,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     afkOverlayHtml.id = "afkOverlay";
     afkOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    afkOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    afkOverlayHtml.style.backgroundRepeat = "no-repeat";
+    afkOverlayHtml.style.backgroundPosition = "center";
     afkOverlayHtml.className = "clickableState";
 
     let afkOverlayEvent: EventListener = () => this.onAfkAction();
@@ -724,6 +739,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     infoOverlayHtml.id = "infoOverlay";
     infoOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    infoOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    infoOverlayHtml.style.backgroundRepeat = "no-repeat";
+    infoOverlayHtml.style.backgroundPosition = "center";
     infoOverlayHtml.className = "textDisplayState";
 
     // build the inner html
@@ -747,6 +765,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     errorOverlayHtml.id = "errorOverlay";
     errorOverlayHtml.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    errorOverlayHtml.style.backgroundColor = "rgba(0,0,0,0.88)";
+    errorOverlayHtml.style.backgroundRepeat = "no-repeat";
+    errorOverlayHtml.style.backgroundPosition = "center";
     errorOverlayHtml.className = "textDisplayState";
 
     // build the inner html
@@ -777,6 +798,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
     spinnerDiv.className = "spinner-border ms-2";
     spinnerDiv.style.backgroundImage =
       "url(./assets/images/Aireal_logo_White.png)";
+    spinnerDiv.style.backgroundColor = "rgba(0,0,0,0.88)";
+    spinnerDiv.style.backgroundRepeat = "no-repeat";
+    spinnerDiv.style.backgroundPosition = "center";
     spinnerDiv.setAttribute("role", "status");
 
     // append the spinner to the element
@@ -848,6 +872,9 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
       spinnerDiv.className = "spinner-border ms-2";
       spinnerDiv.style.backgroundImage =
         "url(./assets/images/Aireal_logo_White.png)";
+      spinnerDiv.style.backgroundColor = "rgba(0,0,0,0.88)";
+      spinnerDiv.style.backgroundRepeat = "no-repeat";
+      spinnerDiv.style.backgroundPosition = "center";
       spinnerDiv.setAttribute("role", "status");
 
       // append the spinner to the element

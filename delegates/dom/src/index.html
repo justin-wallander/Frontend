@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
 
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link id="favSvg" rel="icon" type="image/svg+xml" href="./assets/images/favicon.svg">
+    <link id="favPng" rel="icon" type="image/png" href="./assets/images/favicon.png">
 
     <script type="text/javascript">
         var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
@@ -52,16 +53,16 @@
 
             <div id="controls">
                 <button class="spsUiTool" id="fullscreen-btn">
-                    <object data="" type="image/svg+xml" id="minimizeIcon"></object>
-                    <object data="" type="image/svg+xml" id="maximizeIcon"></object>
+                    <object data="./assets/images/Minimize.svg" type="image/svg+xml" id="minimizeIcon"></object>
+                    <object data="./assets/images/Maximize.svg" type="image/svg+xml" id="maximizeIcon"></object>
                     <span class="tooltiptext">Fullscreen</span>
                 </button>
                 <button class="spsUiTool" id="settingsBtn">
-                    <object data="" type="image/svg+xml" id="settingsIcon"></object>
+                    <object data="./assets/images/Settings.svg" type="image/svg+xml" id="settingsIcon"></object>
                     <span class="tooltiptext">Settings</span>
                 </button>
                 <button class="spsUiTool" id="statsBtn">
-                    <object data="" type="image/svg+xml" id="statsIcon"></object>
+                    <object data="./assets/images/Info.svg" type="image/svg+xml" id="statsIcon"></object>
                     <span class="tooltiptext">Information</span>
                 </button>
             </div>
@@ -79,8 +80,8 @@
                                         <div>Pre Stream Options</div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-sm">
+                                    <div class="row pt-1">
+                                        <div class="col-sm me-3" style="width: 80%">
                                             <label class="form-check-label" for="force-turn-tgl">Force TURN</label>
                                         </div>
                                         <div class="form-check form-switch col-auto">
@@ -91,7 +92,7 @@
 
                                     <div class="row" style="padding-top:5px; padding-bottom: 5px;">
                                         <div class="col col-auto">
-                                            <input id="restart-stream-button" class="streamTools-button btn-flat"
+                                            <input id="restart-stream-button" class="streamTools-button btn-flat ms-1"
                                                 type="button" value="Restart Stream">
                                         </div>
                                     </div>
@@ -104,7 +105,7 @@
                                     <div id="viewSettingsContainer" class="d-none">
 
                                         <div class="row">
-                                            <div class="col-sm">
+                                            <div class="col-sm me-3" style="width: 80%;">
                                                 <label class="form-check-label"
                                                     for="enlarge-display-to-fill-window-tgl">Enlarge
                                                     display to fill window</label>
@@ -116,7 +117,7 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-sm">
+                                            <div class="col-sm me-3" style="width: 80%;">
                                                 <label class="form-check-label" for="quality-control-ownership-tgl">Is
                                                     Quality
                                                     Controller</label>
@@ -128,7 +129,7 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-sm">
+                                            <div class="col-sm me-3" style="width: 80%;">
                                                 <label class="form-check-label" for="match-viewport-res-tgl">Match
                                                     viewport
                                                     resolution</label>
@@ -140,7 +141,7 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-sm">
+                                            <div class="col-sm me-3" style="width: 80%;">
                                                 <label class="form-check-label" for="control-scheme-tgl"
                                                     id="control-scheme-title">Match viewport resolution</label>
                                             </div>
@@ -252,7 +253,7 @@
                                     </div>
                                     <div id="statisticsContainer" class="d-none">
                                         <div class="row">
-                                            <div class="col-sm">
+                                            <div class="col-sm me-3" style="width: 80%;">
                                                 <label class="form-check-label" for="send-stats-tgl"
                                                     id="control-scheme-title">Send
                                                     to server</label>

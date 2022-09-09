@@ -230,10 +230,17 @@ export class DelegateBase implements IDelegate {
 	 * Event fired when the video is disconnected
 	 */
 	onDisconnect(eventString: string) {
-		if(this.showActionOrErrorOnDisconnect == false){
+		
+		// if we have overridden the default disconnection messsage, assign the new value here
+		if (this.iWebRtcController.getDisconnectMessageOverride() != "" && this.iWebRtcController.getDisconnectMessageOverride() !== undefined && this.iWebRtcController.getDisconnectMessageOverride() != null) {
+			eventString = this.iWebRtcController.getDisconnectMessageOverride();
+			this.iWebRtcController.setDisconnectMessageOverride('');
+		}
+
+		if (this.showActionOrErrorOnDisconnect == false) {
 			this.showErrorOverlay(`Disconnected: ${eventString}`);
 			this.showActionOrErrorOnDisconnect = true;
-		}else{
+		} else {
 			this.showDisconnectOverlay(`Disconnected: ${eventString}  \n Click To Restart`);
 		}
 	}

@@ -3,6 +3,13 @@ import { AggregatedStats } from "../PeerConnectionController/AggregatedStats";
 import * as MessageReceive from "./MessageReceive";
 import * as MessageSend from "./MessageSend";
 
+// declare the new method for the websocket interface
+declare global {
+    interface WebSocket {
+        onmessagebinary?(event?: MessageEvent): void;
+    }
+}
+
 /**
  * The controller for the WebSocket and all associated methods 
  */
@@ -23,18 +30,45 @@ export class WebSocketController {
      * @returns - If there is a connection
      */
     connect(): boolean {
-        Logger.verboseLog(this.address);
+        Logger.Log(Logger.GetStackTrace(), this.address, 6);
         try {
             this.webSocket = new WebSocket(this.address);
             this.webSocket.onopen = (event) => this.handleOnOpen(event);
             this.webSocket.onerror = (event) => this.handleOnError(event);
             this.webSocket.onclose = (event) => this.handleOnClose(event);
             this.webSocket.onmessage = (event) => this.handleOnMessage(event);
+            this.webSocket.onmessagebinary = (event) => this.handelOnMessageBinary(event);
             return true;
         } catch (error) {
-            console.error(error);
+            Logger.Error(error, error);
             return false
         }
+    }
+
+    /**
+     * Handles what happens when a message is received in binary form
+     * @param event - Message Received
+     */
+    handelOnMessageBinary(event: MessageEvent) {
+        // if the event is empty return
+        if (!event || !event.data) {
+            return;
+        }
+
+        // handel the binary and then handel the message
+        event.data.text().then((messageString: any) => {
+
+            // build a new message
+            let constructedMessage = new MessageEvent('messageFromBinary', {
+                data: messageString
+            });
+
+            // send the new stringified event back into `onmessage`
+            this.handelOnMessageBinary(constructedMessage);
+
+        }).catch((error: Error) => {
+            Logger.Error(Logger.GetStackTrace(), `Failed to parse binary blob from websocket, reason: ${error}`);
+        });
     }
 
     /**
@@ -42,12 +76,28 @@ export class WebSocketController {
      * @param event - Message Received
      */
     handleOnMessage(event: MessageEvent) {
+
+        // Check if websocket message is binary, if so, stringify it.
+        if (event.data && event.data instanceof Blob) {
+            this.handelOnMessageBinary(event);
+            return;
+        }
+
         let message: MessageReceive.MessageRecv = JSON.parse(event.data);
-        Logger.verboseLog("received => \n" + JSON.stringify(JSON.parse(event.data), undefined, 4));
+        Logger.Log(Logger.GetStackTrace(), "received => \n" + JSON.stringify(JSON.parse(event.data), undefined, 4), 6);
 
         switch (message.type) {
+            case MessageReceive.MessageRecvTypes.PING: {
+
+                // send our pong payload back to the signalling server
+                const payload = new MessageSend.MessagePong(new Date().getTime()).payload()
+                Logger.Log(Logger.GetStackTrace(), MessageReceive.MessageRecvTypes.PING + ": " + payload, 6);
+                this.webSocket.send(payload)
+
+                break;
+            }
             case MessageReceive.MessageRecvTypes.AUTHENTICATION_REQUIRED: {
-                Logger.verboseLog("AUTHENTICATION_REQUIRED");
+                Logger.Log(Logger.GetStackTrace(), "AUTHENTICATION_REQUIRED", 6);
                 let authenticationRequired: MessageReceive.MessageAuthRequired = JSON.parse(event.data);
 
                 let url_string = window.location.href;
@@ -60,7 +110,7 @@ export class WebSocketController {
                 break;
             }
             case MessageReceive.MessageRecvTypes.AUTHENTICATION_RESPONSE: {
-                Logger.verboseLog("AUTHENTICATION_RESPONSE");
+                Logger.Log(Logger.GetStackTrace(), "AUTHENTICATION_RESPONSE", 6);
                 let authenticationResponse: MessageReceive.MessageAuthResponse = JSON.parse(event.data);
 
                 this.onAuthenticationResponse(authenticationResponse);
@@ -71,59 +121,59 @@ export class WebSocketController {
                         break;
                     }
                     case MessageReceive.MessageAuthResponseOutcomeType.AUTHENTICATED: {
-                        Logger.verboseLog("User is authenticated and now requesting an instance")
+                        Logger.Log(Logger.GetStackTrace(), "User is authenticated and now requesting an instance", 6);
 
                         this.webSocket.send(new MessageSend.MessageRequestInstance().payload());
                         break;
                     }
                     case MessageReceive.MessageAuthResponseOutcomeType.INVALID_TOKEN: {
-                        console.warn("Authentication error : Invalid Token");
+                        Logger.Info(Logger.GetStackTrace(), "Authentication error : Invalid Token");
                         break;
                     }
                     case MessageReceive.MessageAuthResponseOutcomeType.ERROR: {
-                        console.warn("Authentication Error from server Check what you are sending");
+                        Logger.Info(Logger.GetStackTrace(), "Authentication Error from server Check what you are sending");
                         break;
                     }
                     default: {
-                        console.error("The Outcome Message has not been handled : this is really bad");
+                        Logger.Error(Logger.GetStackTrace(), "The Outcome Message has not been handled : this is really bad");
                         break;
                     }
                 }
                 break;
             }
             case MessageReceive.MessageRecvTypes.INSTANCE_STATE: {
-                Logger.verboseLog("INSTANCE_STATE");
+                Logger.Log(Logger.GetStackTrace(), "INSTANCE_STATE", 6);
                 let instanceState: MessageReceive.MessageInstanceState = JSON.parse(event.data);
                 this.onInstanceStateChange(instanceState);
                 break;
             }
             case MessageReceive.MessageRecvTypes.CONFIG: {
-                Logger.verboseLog("CONFIG");
+                Logger.Log(Logger.GetStackTrace(), "CONFIG", 6);
                 let config: MessageReceive.MessageConfig = JSON.parse(event.data);
                 this.onConfig(config);
                 break;
             }
             case MessageReceive.MessageRecvTypes.PLAYER_COUNT: {
-                Logger.verboseLog("PLAYER_COUNT");
+                Logger.Log(Logger.GetStackTrace(), "PLAYER_COUNT", 6);
                 let playerCount: MessageReceive.MessagePlayerCount = JSON.parse(event.data);
-                Logger.verboseLog("Player Count: " + (playerCount.count - 1));
+                Logger.Log(Logger.GetStackTrace(), "Player Count: " + (playerCount.count - 1), 6);
 
                 break;
             }
             case MessageReceive.MessageRecvTypes.ANSWER: {
-                Logger.verboseLog("ANSWER");
+                Logger.Log(Logger.GetStackTrace(), "ANSWER", 6);
                 let answer: MessageReceive.MessageAnswer = JSON.parse(event.data);
                 this.onWebRtcAnswer(answer);
                 break;
             }
             case MessageReceive.MessageRecvTypes.ICE_CANDIDATE: {
-                Logger.verboseLog("ICE_CANDIDATE");
+                Logger.Log(Logger.GetStackTrace(), "ICE_CANDIDATE", 6);
                 let iceCandidate: MessageReceive.MessageIceCandidate = JSON.parse(event.data);
                 this.onIceCandidate(iceCandidate.candidate);
                 break;
             }
             default: {
-                console.error("Error Message type not Defined");
+                Logger.Error(Logger.GetStackTrace(), "Error Message type not Defined");
                 break;
             }
         }
@@ -134,7 +184,7 @@ export class WebSocketController {
      * @param event - Not Used
      */
     handleOnOpen(event: Event) {
-        Logger.verboseLog("Connected to the signalling server via WebSocket");
+        Logger.Log(Logger.GetStackTrace(), "Connected to the signalling server via WebSocket", 6);
     }
 
     /**
@@ -142,8 +192,8 @@ export class WebSocketController {
      * @param event - Error Payload
      */
     handleOnError(event: Event) {
-        console.error('WebSocket error: ');
-        console.log(event);
+        Logger.Error(Logger.GetStackTrace(), 'WebSocket error: ');
+        Logger.Log(Logger.GetStackTrace(), event.toString());
     }
 
     /**
@@ -152,14 +202,14 @@ export class WebSocketController {
      */
     handleOnClose(event: CloseEvent) {
         this.onWebSocketOncloseOverlayMessage(event);
-        Logger.verboseLog("Disconnected to the signalling server via WebSocket: " + JSON.stringify(event.code) + " - " + event.reason);
+        Logger.Log(Logger.GetStackTrace(), "Disconnected to the signalling server via WebSocket: " + JSON.stringify(event.code) + " - " + event.reason);
         this.stopAfkWarningTimer();
     }
 
     /**
-     * An override for stoping the afk warning timer
+     * An override for stopping the afk warning timer
      */
-    stopAfkWarningTimer(){}
+    stopAfkWarningTimer() { }
 
     sendWebRtcOffer(offer: RTCSessionDescriptionInit) {
         let payload = new MessageSend.MessageWebRTCOffer(offer);
@@ -171,7 +221,7 @@ export class WebSocketController {
      * @param candidate - RTC Ice Candidate
      */
     sendIceCandidate(candidate: RTCIceCandidate) {
-        console.log("Sending Ice Candidate");
+        Logger.Log(Logger.GetStackTrace(), "Sending Ice Candidate");
         if (this.webSocket && this.webSocket.readyState === this.WS_OPEN_STATE) {
             //ws.send(JSON.stringify({ type: 'iceCandidate', candidate: candidate }));
             let IceCandidate = new MessageSend.MessageIceCandidate(candidate);

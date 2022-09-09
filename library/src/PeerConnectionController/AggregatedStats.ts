@@ -5,6 +5,7 @@ import { CandidateStat } from "./CandidateStat";
 import { CandidatePairStats } from "./CandidatePairStats";
 import { OutBoundVideoStats } from "./OutBoundVideoStats";
 import { StreamStats } from "./StreamStats";
+import { Logger } from "../Logger/Logger";
 
 /**
  * The Aggregated Stats that is generated from the RTC Stats Report
@@ -20,7 +21,7 @@ export class AggregatedStats {
     localCandidates: Array<CandidateStat>;
     remoteCandidates: Array<CandidateStat>;
     outBoundVideoStats: OutBoundVideoStats;
-    streamStats : StreamStats
+    streamStats: StreamStats
 
     constructor() {
         this.inboundVideoStats = new inboundVideoStats();
@@ -84,8 +85,8 @@ export class AggregatedStats {
                     this.handleStream(stat);
                     break;
                 default:
-                    console.error("un handled Stat Type");
-                    console.dir(stat);
+                    Logger.Error(Logger.GetStackTrace(), "unhandled Stat Type");
+                    Logger.Log(Logger.GetStackTrace(), stat);
                     break;
             }
 
@@ -98,7 +99,7 @@ export class AggregatedStats {
      * 
      * @param stat the stats coming in from webrtc
      */
-    handleStream(stat : any) {
+    handleStream(stat: any) {
         this.streamStats = stat
     }
 
@@ -214,7 +215,7 @@ export class AggregatedStats {
                 this.inboundAudioStats.timestamp = stat.timestamp;
                 break;
             default:
-                console.log("Kind is not handled");
+                Logger.Log(Logger.GetStackTrace(), "Kind is not handled");
                 break;
 
         }
@@ -246,13 +247,24 @@ export class AggregatedStats {
      * Process the Inbound Video Track Data  
      */
     handleTrack(stat: any) {
-        this.inboundVideoStats.framesDropped = stat.framesDropped;
-        this.inboundVideoStats.framesReceived = stat.framesReceived;
-        this.inboundVideoStats.framesDroppedPercentage = stat.framesDropped / stat.framesReceived * 100;
-        this.inboundVideoStats.frameHeight = stat.frameHeight;
-        this.inboundVideoStats.frameWidth = stat.frameWidth;
-        this.inboundVideoStats.frameHeightStart = (this.inboundVideoStats.frameHeightStart == null) ? stat.frameHeight : this.inboundVideoStats.frameHeightStart;
-        this.inboundVideoStats.frameWidthStart = (this.inboundVideoStats.frameWidthStart == null) ? stat.frameWidth : this.inboundVideoStats.frameWidthStart
+
+        // we only want to extract stats from the video track
+        if(stat.type === 'track' && (stat.trackIdentifier === 'video_label' || stat.kind === 'video')) {
+            this.inboundVideoStats.framesDropped = stat.framesDropped;
+            this.inboundVideoStats.framesReceived = stat.framesReceived;
+            this.inboundVideoStats.framesDroppedPercentage = stat.framesDropped / stat.framesReceived * 100;
+            this.inboundVideoStats.frameHeight = stat.frameHeight;
+            this.inboundVideoStats.frameWidth = stat.frameWidth;
+            this.inboundVideoStats.frameHeightStart = (this.inboundVideoStats.frameHeightStart == null) ? stat.frameHeight : this.inboundVideoStats.frameHeightStart;
+            this.inboundVideoStats.frameWidthStart = (this.inboundVideoStats.frameWidthStart == null) ? stat.frameWidth : this.inboundVideoStats.frameWidthStart;
+        }
+    }
+
+    /** 
+     * Check if a value coming in from our stats is actually a number  
+     */
+    isNumber(value: any): boolean {
+        return typeof value === 'number' && isFinite(value);
     }
 }
 

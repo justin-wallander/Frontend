@@ -1,19 +1,13 @@
+import 'bootstrap/dist/js/bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/css/bootstrap-grid.min.css'
+import 'bootstrap/dist/css/bootstrap-reboot.min.css'
+import 'bootstrap/dist/css/bootstrap-utilities.min.css'
 import { NativeDOMDelegate } from "./NativeDOMDelegate";
 import * as libspsfrontend from '@tensorworks/libspsfrontend';
-import svgMinimize from './assets/images/Minimize.svg';
-import svgMaximize from './assets/images/Maximize.svg';
-import svgSettings from './assets/images/Settings.svg';
-import svgInfo from './assets/images/Info.svg';
 
-// svg icons for buttons
-let maximizeIcon = document.getElementById('maximizeIcon') as HTMLObjectElement;
-maximizeIcon.data = svgMaximize;
-let minimizeIcon = document.getElementById('minimizeIcon') as HTMLObjectElement;
-minimizeIcon.data = svgMinimize;
-let settingsIcon = document.getElementById('settingsIcon') as HTMLObjectElement;
-settingsIcon.data = svgSettings;
-let statsIcon = document.getElementById('statsIcon') as HTMLObjectElement;
-statsIcon.data = svgInfo;
+// set the logger level
+//libspsfrontend.Logger.SetLoggerVerbosity(10);
 
 // Determine whether a signalling server WebSocket URL was specified at compile-time or if we need to compute it at runtime
 declare var WEBSOCKET_URL: string;
@@ -43,6 +37,8 @@ let playerElement = document.getElementById("player") as HTMLDivElement;
 
 // Create a config object
 let config = CreateConfig(signallingServerAddress, playerElement);
+config.enableSpsAutoConnect = false;
+config.enableSpsAutoplay = false;
 
 // Create a Native DOM delegate instance that implements the Delegate interface class
 let delegate = new NativeDOMDelegate(config);
@@ -62,6 +58,5 @@ document.ontouchmove = (event: TouchEvent) => {
 // Create a config object instance 
 function CreateConfig(signalingAddress: string, playerElement: HTMLDivElement) {
     let config = new libspsfrontend.Config(signalingAddress, playerElement);
-    libspsfrontend.Config._enableVerboseLogging = true;
     return config;
 }

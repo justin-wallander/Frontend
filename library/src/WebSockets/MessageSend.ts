@@ -15,7 +15,8 @@ export enum MessageSendTypes {
     STATS = "stats",
     AUTHENTICATION_REQUEST = "authenticationRequest",
     REQUEST_INSTANCE = "requestInstance",
-    OFFER = "offer"
+    OFFER = "offer",
+    PONG = "pong"
 }
 
 /**
@@ -30,7 +31,7 @@ export class MessageSend implements Send {
      * @returns - JSON String of the Message to send
      */
     payload() {
-        Logger.verboseLog("Sending => \n" + JSON.stringify(this, undefined, 4));
+        Logger.Log(Logger.GetStackTrace(), "Sending => \n" + JSON.stringify(this, undefined, 4), 6);
         return JSON.stringify(this);
     }
 }
@@ -59,6 +60,20 @@ export class MessageAuthRequest extends MessageSend {
         this.type = MessageSendTypes.AUTHENTICATION_REQUEST;
         this.token = token;
         this.provider = provider;
+    }
+}
+
+/**
+ * Instance Request Message Wrapper
+ */
+export class MessagePong extends MessageSend {
+
+    time: number;
+
+    constructor(time: number) {
+        super();
+        this.type = MessageSendTypes.PONG;
+        this.time = time
     }
 }
 
@@ -140,7 +155,7 @@ export class MessageIceCandidate implements Send {
      * @returns - JSON String of the Message to send
      */
     payload() {
-        Logger.verboseLog("Sending => \n" + JSON.stringify(this, undefined, 4));
+        Logger.Log(Logger.GetStackTrace(), "Sending => \n" + JSON.stringify(this, undefined, 4), 6);
         return JSON.stringify(this);
     }
 }

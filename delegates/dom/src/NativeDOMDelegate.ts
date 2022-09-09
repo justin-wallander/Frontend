@@ -1,6 +1,5 @@
 import './assets/css/player.css';
 import playButton from './assets/images/Play.png';
-import 'bootstrap/dist/css/bootstrap.min.css'
 import { EventEmitter } from "events";
 import * as libspsfrontend from '@tensorworks/libspsfrontend'
 
@@ -330,10 +329,14 @@ export class FullScreenLogic {
 		if (minimize && maximize) {
 			if (this.isFullscreen) {
 				minimize.style.display = 'inline';
+				//ios disappearing svg fix
+				minimize.style.transform = 'translate(0, 0)';
 				maximize.style.display = 'none';
 			} else {
 				minimize.style.display = 'none';
 				maximize.style.display = 'inline';
+				//ios disappearing svg fix
+				maximize.style.transform = 'translate(0, 0)';
 			}
 		}
 	}
@@ -349,8 +352,6 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 	iWebRtcController: libspsfrontend.IWebRtcPlayerController;
 
 	showStats: boolean;
-
-	logging: boolean;
 
 	// HTML Elements that are used multiple times
 
@@ -403,7 +404,6 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 	constructor(config: libspsfrontend.Config) {
 		super(config);
 		this.showStats = true;
-		this.logging = false;
 		this.videoQpIndicator = new VideoQpIndicator("connectionStrength", "qualityText", "outer", "middle", "inner", "dot");
 		this.fullScreenLogic = new FullScreenLogic();
 
@@ -635,7 +635,12 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 				}
 				break;
 			case libspsfrontend.InstanceState.READY:
-				instanceStateMessage = "Instance is Ready: " + instanceState.details;
+				if (instanceState.details == undefined || instanceState.details == null) {
+					instanceStateMessage = "Instance is Ready";
+					
+				} else {
+					instanceStateMessage = "Instance is Ready: " + instanceState.details;
+				}
 				break;
 			default:
 				instanceStateMessage = "Unhandled Instance State" + instanceState.state + " " + instanceState.details;
@@ -729,11 +734,12 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 
 		// set up the restart stream button
 		document.getElementById("restart-stream-button").onclick = () => {
+			this.settingsPanel.classList.toggle("panel-wrap-visible");
 			this.iWebRtcController.restartStreamAutomaticity();
 		}
 
 		document.getElementById("btn-streaming-settings").onclick = () => {
-			console.debug("--------  Sending Streaming settings  --------");
+			libspsfrontend.Logger.Log(libspsfrontend.Logger.GetStackTrace(), "--------  Sending Streaming settings  --------", 7);
 			let encode: libspsfrontend.Encoder = {
 				MinQP: Number(this.encoderMinQpText.value),
 				MaxQP: Number(this.encoderMaxQpText.value),
@@ -747,7 +753,7 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 
 			this.iWebRtcController.sendEncoderSettings(encode);
 			this.iWebRtcController.sendWebRtcSettings(webRtcSettings);
-			console.debug("-------------------------------------------");
+			libspsfrontend.Logger.Log(libspsfrontend.Logger.GetStackTrace(), "-------------------------------------------", 7);
 		}
 
 
@@ -770,7 +776,8 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 
 		// make the player match the view port resolution 
 		this.toggleMatchViewPortRes.onchange = () => {
-			this.iWebRtcController.matchViewportResolution = this.toggleMatchViewPortRes.checked
+			this.iWebRtcController.matchViewportResolution = this.toggleMatchViewPortRes.checked;
+			this.iWebRtcController.updateVideoStreamSize();
 		};
 
 		// quality control ownership checkbox 
@@ -960,20 +967,34 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 		let statsText = "";
 		let inboundData = this.formatBytes(stats.inboundVideoStats.bytesReceived, 2);
 
+		// format numbering based on the browser language
+		let numberFormat = new Intl.NumberFormat(window.navigator.language, {
+            maximumFractionDigits: 0
+        });
+
+		// ensure that we have a currentRoundTripTime coming in from stats and format it if it's a number
+		let netRTT = stats.candidatePair.hasOwnProperty('currentRoundTripTime') && stats.isNumber(stats.candidatePair.currentRoundTripTime) ? numberFormat.format(stats.candidatePair.currentRoundTripTime * 1000) : 'Can\'t calculate';
+
 		statsText += `<div>Duration: ${runTime}</div>`;
-		statsText += `<div>Inbound Video Data Received: ${inboundData}</div>`;
+		statsText += `<div>Received: ${inboundData}</div>`;
 		statsText += `<div>Packets Lost: ${stats.inboundVideoStats.packetsLost}</div>`;
 		statsText += `<div>Bitrate (kbps): ${stats.inboundVideoStats.bitrate}</div>`;
+		statsText += `<div>Video Resolution: ${
+            stats.inboundVideoStats.hasOwnProperty('frameWidth') && stats.inboundVideoStats.frameWidth && stats.inboundVideoStats.hasOwnProperty('frameHeight') && stats.inboundVideoStats.frameHeight ?
+                stats.inboundVideoStats.frameWidth + 'x' + stats.inboundVideoStats.frameHeight : 'Chrome only'
+            }</div>`;
+		statsText += `<div>Frames Decoded: ${stats.inboundVideoStats.hasOwnProperty('framesDecoded') ? numberFormat.format(stats.inboundVideoStats.framesDecoded) : 'Chrome only'}</div>`;
+		statsText += `<div>Packets Lost: ${stats.inboundVideoStats.hasOwnProperty('packetsLost') ? numberFormat.format(stats.inboundVideoStats.packetsLost) : 'Chrome only'}</div>`;
 		statsText += `<div>Framerate: ${stats.inboundVideoStats.framerate}</div>`;
 		statsText += `<div>Frames dropped: ${stats.inboundVideoStats.framesDropped}</div>`;
-		statsText += `<div>Net RTT (ms): ${stats.candidatePair.currentRoundTripTime}</div>`;
-		statsText += `<div>Browser receive to composite (ms): ${stats.inboundVideoStats.receiveToCompositeMs}</div>`;
+		statsText += `<div>Net RTT (ms): ${netRTT}</div>`;
+		//statsText += `<div>Browser receive to composite (ms): ${stats.inboundVideoStats.receiveToCompositeMs}</div>`;
 		statsText += `<div>Video Quantization Parameter: ${this.videoQpIndicator.videoEncoderAvgQP}</div>`;
 
 		let statsDiv = document.getElementById("statisticsResult");
 		statsDiv.innerHTML = statsText;
 
-		if (this.logging) { libspsfrontend.Logger.verboseLog(`--------- Stats ---------\n ${stats}\n------------------------`) }
+		libspsfrontend.Logger.Log(libspsfrontend.Logger.GetStackTrace(), `--------- Stats ---------\n ${stats}\n------------------------`, 6);
 
 		if (this.sendStatsToServer.checked === true) {
 			this.iWebRtcController.sendStatsToSignallingServer(stats);
@@ -1004,7 +1025,7 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 	* @param latencyTimings - Latency Test Timings sent from the UE Instance 
 	*/
 	onLatencyTestResult(latencyTimings: libspsfrontend.LatencyTestResults): void {
-		console.log(latencyTimings);
+		libspsfrontend.Logger.Log(libspsfrontend.Logger.GetStackTrace(), latencyTimings.toString(), 6);
 		let latencyStatsInnerHTML = '';
 		latencyStatsInnerHTML += "<div>Net latency RTT (ms): " + latencyTimings.networkLatency + "</div>";
 		latencyStatsInnerHTML += "<div>UE Encode (ms): " + latencyTimings.EncodeMs + "</div>";
@@ -1057,11 +1078,4 @@ declare global {
 		mozRequestFullscreen?: () => Promise<void>;
 		webkitRequestFullscreen?: () => Promise<void>;
 	}
-}
-
-/**
- * The static check to allow verbose logging
- */
-export class LoggingOptions {
-	static verboseLogging = false;
 }

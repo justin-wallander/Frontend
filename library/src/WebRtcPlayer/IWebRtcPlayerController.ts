@@ -13,7 +13,7 @@ export interface IWebRtcPlayerController {
     onAfkClick(): void;
 
     /**
-     * Activate the events for when the video play button is clicked 
+     * Activate the streams video source 
      */
     playStream(): void;
 
@@ -82,8 +82,23 @@ export interface IWebRtcPlayerController {
     activateRegisterMouse(): void;
 
     /**
-	 * Sets if we are enlarging the display to fill the window for freeze frames and ui 
-	 * @param isFilling is the display filling or not
-	 */
-	setEnlargeToFillDisplay(isFilling: boolean): void;
+     * Sets if we are enlarging the display to fill the window for freeze frames and ui 
+     * @param isFilling is the display filling or not
+     */
+    setEnlargeToFillDisplay(isFilling: boolean): void;
+
+    /**
+     * Handles when the stream size changes
+     */
+    updateVideoStreamSize(): void;
+
+    /**
+     * Get the overridden disconnect message
+     */
+    getDisconnectMessageOverride(): string;
+
+    /**
+     * Set the override for the disconnect message
+     */
+    setDisconnectMessageOverride(message: string): void;
 }

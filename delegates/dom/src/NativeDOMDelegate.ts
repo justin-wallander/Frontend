@@ -973,7 +973,7 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
         });
 
 		// ensure that we have a currentRoundTripTime coming in from stats and format it if it's a number
-		let netRTT = stats.candidatePair.hasOwnProperty('currentRoundTripTime') && stats.isNumber(stats.candidatePair.currentRoundTripTime) ? numberFormat.format(stats.candidatePair.currentRoundTripTime * 1000) : 'Can\'t calculate';
+		let netRTT = stats.candidatePair.hasOwnProperty('currentRoundTripTime') && (typeof stats.candidatePair.currentRoundTripTime === 'number') ? numberFormat.format(stats.candidatePair.currentRoundTripTime * 1000) : 'Can\'t calculate';
 
 		statsText += `<div>Duration: ${runTime}</div>`;
 		statsText += `<div>Received: ${inboundData}</div>`;

@@ -3,6 +3,19 @@ import playButton from './assets/images/Play.png';
 import { EventEmitter } from "events";
 import * as libspsfrontend from '@tensorworks/libspsfrontend'
 
+async function downloadImage(imageSrc: string) {
+  const image = await fetch(imageSrc)
+  const imageBlob = await image.blob()
+  const imageURL = URL.createObjectURL(imageBlob)
+
+  const link = document.createElement('a')
+  link.href = imageURL
+  link.download = imageSrc
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 /**
  * Class for the base overlay structure 
  */
@@ -342,7 +355,6 @@ export class FullScreenLogic {
 	}
 
 }
-
 export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 	config: libspsfrontend.Config;
 	latencyStartTime: number;
@@ -725,6 +737,7 @@ export class NativeDOMDelegate extends libspsfrontend.DelegateBase {
 
 		// setup the info button
 		document.getElementById('statsBtn').onclick = () => this.statsClicked();
+		    // downloadImage("/home/ue4/project/HoverPOC/Saved/Screenshots/Linux/HighresScreenshot00000.png")
 		document.getElementById('statsClose').onclick = () => this.statsClicked();
 
 		// setup the Force TURN toggle

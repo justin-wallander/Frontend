@@ -4,3 +4,4 @@ types/
 .vscode
 !.env.example
 .env
+.DS_Store
